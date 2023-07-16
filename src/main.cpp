@@ -1,5 +1,6 @@
 #include "spiffsutils.h"
 #include "CC1101utils.h"
+#include <ELECHOUSE_CC1101_SRC_DRV.h>
 #include "SimpleMenuNav.h"
 #include "WiFi.h"
 #include "esp_sleep.h"
@@ -20,6 +21,9 @@
 #define MINIMUM_COPYTIME_US 16000
 #define DUMP_RAW_MBPS 0.1 // as percentage of 1Mbps, us precision. (100kbps) This is mainly to dump and analyse in, ex, PulseView
 #define BOUND_SAMPLES false
+
+/// @brief 
+double used_frequency = 868.3; //Change the default frequency here
 
 //ONLY USING ONE BUFFER FOR NOW, MUST BE REFACTORED TO SUPPORT MORE (AND MOVE TO SPIFFS)
 uint16_t signal433_store[MAXSIGS][BUFSIZE];
@@ -91,6 +95,7 @@ void copy() {
   int i, transitions = 0;
   lastCopyTime = 0;
   CCInit();
+  ELECHOUSE_cc1101.setMHZ(used_frequency);
   CCSetRx();
   delay(50);
   //FILTER OUT NOISE SIGNALS (too few transistions or too fast)
@@ -118,6 +123,7 @@ void replay (int t) {
   int i;
   unsigned int totalDelay = 0;
   CCInit();
+  ELECHOUSE_cc1101.setMHZ(used_frequency);
   CCSetTx();
   delay(50);
   int64_t startus = esp_timer_get_time();
@@ -188,40 +194,10 @@ void dump () {
 }
 
 
-// THIS IS OBVIOUSLY SLOW
-void rawout() {
-  CCInit();
-  CCSetRx();
-  delay(50);
-
-  byte b;
-  bool endloop = false;
-  long t = 0;
-  long start = millis();
-  while(!endloop) {
-    b = CCAvgRead();
-    //BOTTLENECK ON SERIAL WRITE... OUT VALUES ARE BOTH ASCII AND EASY TO FILTER IN PULSEVIEW
-    if (b) Serial.write(124);
-    else Serial.write(46);
-    Serial.flush();
-    t++;
-    if (SMN_isAnyButtonPressed()) {
-      endloop = true;
-    }
-  }
-  long tt = millis() - start;
-  
-  Serial.print("\n Total time(ms): ");
-  Serial.print(tt);
-  Serial.print("\n Total bits: ");
-  Serial.print(t);
-  Serial.print("\n bits/sec: ");
-  Serial.println((t*1.0)/(tt/1000.0));
-}
-
 // THIS IS OBVIOUSLY NOT REAL TIME
 void monitormode() {
   CCInit();
+  ELECHOUSE_cc1101.setMHZ(used_frequency);
   CCSetRx();
   delay(50);
  
@@ -263,10 +239,66 @@ void monitormode() {
   }
 }
 
+void set_frequency () {
+  tft.fillScreen(TFT_BLACK);
+  tft.drawRect(0, 0, WIDTH-1, HEIGHT-1, TFT_WHITE);
+  tft.setFreeFont(FMB24);
+  tft.setTextColor(TFT_RED, TFT_WHITE);
+  tft.drawString(String(used_frequency),35,45, GFXFF);
+
+  int chose = 0;
+
+  while(true) {
+    double frequencylist[] = {300.0, 310.0, 315.0, 315.1, 315.4, 315.8, 318.0, 390.0, 433.0, 433.075, 433.330, 433.650, 433.92, 433.94,868.025, 868.3, 868.35, 868.7, 915.0, 915.025, 915.2, 915.5};
+    int freq_nb = sizeof(frequencylist) / sizeof(frequencylist[0]);
+    if (SMN_isUpButtonPressed()) return;
+    if (SMN_isDownButtonPressed()){
+      delay(150);
+      used_frequency = frequencylist[chose];
+      chose +=1;
+      tft.drawString(String(used_frequency),35,45 , GFXFF);
+    }
+    if (chose >= freq_nb) chose = 0;
+  }
+}
+
+// THIS IS OBVIOUSLY SLOW
+void rawout() {
+  CCInit();
+  CCSetRx();
+  delay(50);
+
+  byte b;
+  bool endloop = false;
+  long t = 0;
+  long start = millis();
+  while(!endloop) {
+    b = CCAvgRead();
+    //BOTTLENECK ON SERIAL WRITE... OUT VALUES ARE BOTH ASCII AND EASY TO FILTER IN PULSEVIEW
+    if (b) Serial.write(124);
+    else Serial.write(46);
+    Serial.flush();
+    t++;
+    if (SMN_isAnyButtonPressed()) {
+      endloop = true;
+    }
+  }
+  long tt = millis() - start;
+  
+  Serial.print("\n Total time(ms): ");
+  Serial.print(tt);
+  Serial.print("\n Total bits: ");
+  Serial.print(t);
+  Serial.print("\n bits/sec: ");
+  Serial.println((t*1.0)/(tt/1000.0));
+}
+
+
 
 void setup() {
   
   CCInit();
+  ELECHOUSE_cc1101.setMHZ(used_frequency);
   CCSetRx();
   Serial.begin(1000000);
 
@@ -276,26 +308,22 @@ void setup() {
   |-> COPY
   |-> REPLAY
   |-> DUMP
-  |-> MORE
-      |-> MONITOR
-      |-> RAW OUT
-      |-> ABOUT
+  |-> MONITOR
   */
 
   SimpleMenu *menu_main = new SimpleMenu("Main");
-  SimpleMenu *menu_copy = new SimpleMenu("Copy",menu_main,copy);
   SimpleMenu *menu_replay = new SimpleMenu("Replay",menu_main,replay);
-  SimpleMenu *menu_dump = new SimpleMenu("Dump",menu_main,dump);
+  SimpleMenu *menu_copy = new SimpleMenu("Copy",menu_main,copy);
+  SimpleMenu *menu_monitor = new SimpleMenu("Monitor",menu_main,monitormode);
   SimpleMenu *menu_more = new SimpleMenu("More",menu_main,NULL);
 
-  SimpleMenu *menu_monitor = new SimpleMenu("Monitor",menu_more,monitormode);
+  SimpleMenu *menu_frequency = new SimpleMenu("Frequency",menu_more,set_frequency);
+  SimpleMenu *menu_dump = new SimpleMenu("Dump",menu_more,dump);
   SimpleMenu *menu_load = new SimpleMenu("Raw Out",menu_more,rawout);
-  SimpleMenu *menu_about = new SimpleMenu("About",menu_more,SMN_screensaver);
 
 
   menu_dump->alertDone = false;
   menu_monitor->alertDone = false;
-  menu_about->alertDone = false;
   SMN_initMenu(menu_main);
  
   //// ENSURE RADIO OFF (FOR LESS INTERFERENCE?)

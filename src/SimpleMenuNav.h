@@ -3,7 +3,7 @@
 #include "Free_Fonts.h"
 #include <TFT_eSPI.h> 
 
-#define IO433VERSION "v0.2"
+#define IO868VERSION "v0.4"
 #define BUTTON_UP  35
 #define BUTTON_DOWN  0
 #define LONGCLICK_MS 300
@@ -116,34 +116,6 @@ bool SMN_isDownButtonPressed() {
   return butDown.isPressedRaw();
 }
 
-void SMN_screensaver() {
-  byte xx[24];
-  memset(xx,0,24*sizeof(byte));
-  byte col,i,x,y;
-  char c;
-  while(true) {
-    col = random(24);
-    for (i=0;i<=xx[col];i++) {
-      x = col*10;
-      y = i*12+1;
-      if ((i%2==0)^(col%2==0)) c = '1'; else c = '0';
-      tft.setFreeFont(FM9);
-      tft.setTextColor(TFT_WHITE, TFT_BLACK);
-      tft.drawChar(c, x, y, GFXFF);
-      delay(15);
-      tft.setTextColor(TFT_GREEN, TFT_BLACK);
-      tft.drawChar(c, x, y, GFXFF);
-      if (SMN_isAnyButtonPressed()) return;
-      lastClick = millis();
-    }
-    xx[col]++;
-    if (xx[col] > 11) xx[col] = 0;
-    tft.setFreeFont(FM12);
-    tft.setTextColor(TFT_MAROON, TFT_DARKGREY);
-    tft.drawString(IO433VERSION, 10, 110, GFXFF);
-    tft.drawString("@kripthor", 100, 110, GFXFF);
-  }
-}
 
 void SMN_initMenu(SimpleMenu *menu) {
   butUp.setLongClickTime(300);
@@ -165,11 +137,10 @@ void SMN_initMenu(SimpleMenu *menu) {
   tft.fillScreen(TFT_BLACK);
   tft.setTextColor(TFT_RED, TFT_BLACK);
   tft.setFreeFont(FMB9);
-  SMN_printAt(" ___ ___  _ _ ________",0,26-16);
-  SMN_printAt("|_ _/ _ \\| | |__ /__ /",0,26*2-16);
-  SMN_printAt(" | | (_) |_  _|_ \\|_ \\",0,26*3-16);
-  SMN_printAt("|___\\___/  |_|___/___/",0,26*4-16);
-  SMN_printAt("                 v0.2",0,26*5-16);
+  SMN_printAt(" ___  _   _   _   _  ",0,26-16);
+  SMN_printAt("  |  | | (_) |_  (_)",0,26*2-16);
+  SMN_printAt(" _|_ |_| (_) |_) (_) ",0,26*3-16);
+  SMN_printAt("                V0.4 ",0,26*4-16);
   delay(1000);
  
 }
