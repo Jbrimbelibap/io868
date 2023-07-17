@@ -4,16 +4,18 @@ IO686 is a fork of the original io433 project by Krypthor with some minor change
 
 It is called 868 because the default frequency has been changed to match the one which my garage operates at ;).
 
-This can be changes easily back to 433.92Mhz if you wish.
+This can be changes easily back to 433.92Mhz if you wish .
 
 ##
 
 
 Changes include :
 
-* A new frequency selection menu with 22 choices ranging from 310Mhz to 915Mhz. (This selection is the same regardless of the code number [0] [1] etc, and is forgotten after rebooting).
+* A new frequency selection menu with 22 choices ranging from 310Mhz to 915Mhz.
+  
+* A way for each page to remember the chosen frequency
 
-* The menus has been reordered to have the monitor mode in the main menu, useful to make sure the right frequency is selected.
+* The menus has been changed slightly, monitor mode is next to frequency to make it easier to use io868 to find the frequency of your remote
 
 * no more "about" section.
 
@@ -22,7 +24,7 @@ Navigation is still the same, double click to move up and down the various recor
 I recommend using the red CC1101 board if you have good soldering skills. Any board should work at pretty much any frequency below 1GHz
 
 
-It would be cool if a selected frequency could be associated to a signal, and if raw signals could be imported into the device. This remains to be done
+Still no way to import signals into the device
 
 ##
 ![i0868](https://github.com/Jbrimbelibap/io868/assets/90109439/0ae8d3f7-e108-477f-a39a-6a95c4aac4b2)
