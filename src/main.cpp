@@ -22,10 +22,7 @@
 #define DUMP_RAW_MBPS 0.1 // as percentage of 1Mbps, us precision. (100kbps) This is mainly to dump and analyse in, ex, PulseView
 #define BOUND_SAMPLES false
 
-/// @brief 
-double used_frequency = 868.3; //Change the default frequency here
 
-//ONLY USING ONE BUFFER FOR NOW, MUST BE REFACTORED TO SUPPORT MORE (AND MOVE TO SPIFFS)
 uint16_t signal433_store[MAXSIGS][BUFSIZE];
 uint16_t *signal433_current = signal433_store[0];
 
@@ -239,6 +236,8 @@ void monitormode() {
   }
 }
 
+
+//Function that allows the user to set their chosen frequency for each page. The default frequency can be changed in spiffutils.H
 void set_frequency () {
   tft.fillScreen(TFT_BLACK);
   tft.drawRect(0, 0, WIDTH-1, HEIGHT-1, TFT_WHITE);
@@ -248,7 +247,7 @@ void set_frequency () {
 
   int chose = 0;
 
-  while(true) {
+  while(true) {   //You can add other frequencies here if you need, or remove some.
     double frequencylist[] = {300.0, 310.0, 315.0, 315.1, 315.4, 315.8, 318.0, 390.0, 433.0, 433.075, 433.330, 433.650, 433.92, 433.94,868.025, 868.3, 868.35, 868.7, 915.0, 915.025, 915.2, 915.5};
     int freq_nb = sizeof(frequencylist) / sizeof(frequencylist[0]);
     if (SMN_isUpButtonPressed()) return;
@@ -257,6 +256,9 @@ void set_frequency () {
       used_frequency = frequencylist[chose];
       chose +=1;
       tft.drawString(String(used_frequency),35,45 , GFXFF);
+
+      String freqname = "/" + String(pcurrent) +".txt";
+      saveFrequency(freqname, used_frequency);
     }
     if (chose >= freq_nb) chose = 0;
   }
@@ -309,16 +311,20 @@ void setup() {
   |-> REPLAY
   |-> DUMP
   |-> MONITOR
+  |-> More
+    |-> Frequency
+    |-> Dump
+    |-> Rawout
   */
 
   SimpleMenu *menu_main = new SimpleMenu("Main");
   SimpleMenu *menu_replay = new SimpleMenu("Replay",menu_main,replay);
   SimpleMenu *menu_copy = new SimpleMenu("Copy",menu_main,copy);
-  SimpleMenu *menu_monitor = new SimpleMenu("Monitor",menu_main,monitormode);
+  SimpleMenu *menu_monitor = new SimpleMenu("Dump",menu_main,dump);
   SimpleMenu *menu_more = new SimpleMenu("More",menu_main,NULL);
 
-  SimpleMenu *menu_frequency = new SimpleMenu("Frequency",menu_more,set_frequency);
-  SimpleMenu *menu_dump = new SimpleMenu("Dump",menu_more,dump);
+  SimpleMenu *menu_frequency = new SimpleMenu("Frequency",menu_more,set_frequency);   //Set monitor and frequency next to another to make it easier to find the frequency of the remote
+  SimpleMenu *menu_dump = new SimpleMenu("Monitor",menu_more,monitormode);
   SimpleMenu *menu_load = new SimpleMenu("Raw Out",menu_more,rawout);
 
 
@@ -357,6 +363,9 @@ void loop() {
   SMN_loop(); //MUST BE REGULARY CALLED.
   delay(LOOPDELAY);
   signal433_current = signal433_store[pcurrent];
+
+  String freqname = "/" + String(pcurrent) +".txt";
+  readFrequency(freqname);
 
   if (SMN_idleMS() > HIBERNATEMS) {
     SMN_alert("SLEEPING...",100,3000);
