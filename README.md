@@ -1,8 +1,9 @@
 #IO868
-...
-IO686 is a fork of the original io433 project by Krypthor with some minor changes.
+###
 
-It is called 868 because the default frequency has been changed to match the one which my garage operates at ;).
+IO868 is a fork of the original io433 project by Krypthor with some minor changes.
+
+It is called 868 because the default frequency has been changed to match the one which my garage operates at
 
 This can be changes easily back to 433.92Mhz if you wish .
 
