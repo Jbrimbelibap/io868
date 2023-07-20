@@ -15,6 +15,8 @@ Changes include :
 * A new frequency selection menu with 22 choices ranging from 310Mhz to 915Mhz.
   
 * A way for each page to remember the chosen frequency
+  
+* A new function lo load a custom code to the current page's saved signal from an array defined in main.cpp. Not ideal but loading from the serial monitor doesn't work because of speed limitation, and loading from SPIFFS works, but all signals are lost each time you load a file containing the code from platformIO... The project should move to LittleFS for this.
 
 * The menus has been changed slightly, monitor mode is next to frequency to make it easier to use io868 to find the frequency of your remote
 
