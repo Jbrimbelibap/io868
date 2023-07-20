@@ -17,17 +17,16 @@ Changes include :
 * A way for each page to remember the chosen frequency
   
 * A new function lo load a custom code to the current page's saved signal from an array defined in main.cpp. Not ideal but loading from the serial monitor doesn't work because of speed limitation, and loading from SPIFFS works, but all signals are lost each time you load a file containing the code from platformIO... The project should move to LittleFS for this.
+  
+* Make dump menu only output the useful part of the signal, not flood the serial monitor
 
 * The menus has been changed slightly, monitor mode is next to frequency to make it easier to use io868 to find the frequency of your remote
 
 * no more "about" section.
 
-Navigation is still the same, double click to move up and down the various recorded signals etc.
-
 I recommend using the red CC1101 board if you have good soldering skills. Any board should work at pretty much any frequency below 1GHz
 
 
-Still no way to import signals into the device
 
 ##
 ![i0868](https://github.com/Jbrimbelibap/io868/assets/90109439/0ae8d3f7-e108-477f-a39a-6a95c4aac4b2)
