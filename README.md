@@ -33,9 +33,65 @@ Still no way to import signals into the device
 ![i0868](https://github.com/Jbrimbelibap/io868/assets/90109439/0ae8d3f7-e108-477f-a39a-6a95c4aac4b2)
 (doesn't look as professionnal but i'm pretty sure it's more compact.)
 
+## How to flash IO433   
+
+### Using [Platformio](https://platformio.org/)
+
+* Install Visual Studio
+* Install PlatformIO from the Extensions (restart)
+* Install the Espressif 32 platform from the PlatformIO Embedded tab (restart)
+* Clone the repository
+* Change the file ./include/CC1101utils.h and uncomment your CC1101 version(either the TICC1101 or the E07M1101D)
+* Connect USB-C cable to TTGO
+* Build and upload
+
+## How to use it
+
+Plug the ESP32 to a battery or a to a USB-C cable. The current menu structure is the following:
+
+```bash
+│ Main
+├── Copy   # Copy signal to current memory bank
+├── Replay # Replay signal from current memory bank
+├── Dump   # Dump current memory bank to screen and serial (fixed 100kbps, for easy analysis on third party software [ex. PulseView])
+└── More
+    ├── Monitor # Dump raw signal to screen and RSSI info
+    ├── Raw Out # Dump current signal to serial as fast as possible (default 1Mbps serial)
+    └── About   # About menu
+```
+
+## Button behaviour
+
+* UP and DOWN short press, moves between menu items
+* UP long press is moves back a level
+* DOWN long press enters current submenu or function
+* UP or DOWN double press moves back and forward from memory banks (to store/replay multiple signals) 
+
+## Dependencies
+
+This project uses:
+
+ * Button2 lib (which should auto-update on build via platformio.ini)
+ * SmartRC-CC1101-Driver-Lib (on /lib, added minor changes for the ESP32 TDisplay)
+ * TFT_eSPI (on /lib, added minor changes for the ESP32 TDisplay)
+
+# Improvements
+
+There are many possibilities for improvements:
+* Stop using SPIFFS so that a custom.txt file containing a csutom code could be loaded into storage without issues
+
+* Code refactoring. Make SimpleMenu a proper lib.
+* Configuration menus for changing output data rates and formats
+* Configuration menus for CC1101 setup: modulations, data rates and bandwidth
+* Implement other modulations besides ASK-OOK
+* Add upload data files from PC to be replayed
+* Add accept from serial and transmit features
+* and so forth...
+
+Feel free to clone and play around, as well as to contribute and make a pull request.
 
 
-
+Original project documentation :
 # Project IO433
 
 ```
@@ -139,63 +195,6 @@ or grab the STL from the [docs](docs/IO433.stl)
 PCB Version:
 Tinker/download, both TI-CC1101 and E07-M1101 versions, from  [tinkercad](https://www.tinkercad.com/things/0qDgP6hPqE1)
 
-
-## How to flash IO433   
-
-### Using [Platformio](https://platformio.org/)
-
-* Install Visual Studio
-* Install PlatformIO from the Extensions (restart)
-* Install the Espressif 32 platform from the PlatformIO Embedded tab (restart)
-* Clone the repository
-* Change the file ./include/CC1101utils.h and uncomment your CC1101 version(either the TICC1101 or the E07M1101D)
-* Connect USB-C cable to TTGO
-* Build and upload
-
-## How to use it
-
-Plug the ESP32 to a battery or a to a USB-C cable. The current menu structure is the following:
-
-```bash
-│ Main
-├── Copy   # Copy signal to current memory bank
-├── Replay # Replay signal from current memory bank
-├── Dump   # Dump current memory bank to screen and serial (fixed 100kbps, for easy analysis on third party software [ex. PulseView])
-└── More
-    ├── Monitor # Dump raw signal to screen and RSSI info
-    ├── Raw Out # Dump current signal to serial as fast as possible (default 1Mbps serial)
-    └── About   # About menu
-```
-
-## Button behaviour
-
-* UP and DOWN short press, moves between menu items
-* UP long press is moves back a level
-* DOWN long press enters current submenu or function
-* UP or DOWN double press moves back and forward from memory banks (to store/replay multiple signals) 
-
-## Dependencies
-
-This project uses:
-
- * Button2 lib (which should auto-update on build via platformio.ini)
- * SmartRC-CC1101-Driver-Lib (on /lib, added minor changes for the ESP32 TDisplay)
- * TFT_eSPI (on /lib, added minor changes for the ESP32 TDisplay)
-
-# Improvements
-
-There are many possibilities for improvements:
-
-* Code refactoring. Make SimpleMenu a proper lib.
-* Better SPIFFS management
-* Configuration menus for changing output data rates and formats
-* Configuration menus for CC1101 setup: frequencies, modulations, data rates and bandwidth
-* Implement other modulations besides ASK-OOK
-* Add upload data files from PC to be replayed
-* Add accept from serial and transmit features
-* and so forth...
-
-Feel free to clone and play around, as well as to contribute and make a pull request.
 
 ## Kudos
 
